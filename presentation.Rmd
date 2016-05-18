@@ -1,0 +1,83 @@
+---
+title: "Visualization Practices/Mistakes"
+author: "Nick Strayer"
+date: "May 17, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+## Outline
+
+- [What to use?](#what-to-use)
+- [Common Mistakes/fixes](#common-mistakes)
+    - [Pie Charts](#pie-charts)
+    - Word Clounds
+    - Trucated Axes
+    - Multiple Axes
+    - Information Overload
+    - The Third Dimension
+- Ggplot
+    - Weaknesses
+    - Strengths
+    - Bottom Line
+- New Tools/Libraries
+    - plotly
+    - html widgets
+      - Manhattan Plots
+- Complex Visualizations/Dashboards
+    - Ggmatrix
+    - Don't go crazy
+    - Plan Ahead. 
+- Beauty Vs. Clarity. 
+  
+  ---
+
+## <a name="what-to-use"></a> What to use?
+
+> "The best camera is the one that's with you." –Chase Jarvis.
+
+- Jeff Leek has a [fantastic article](http://simplystatistics.org/2016/02/11/why-i-dont-use-ggplot2/) on his blog about this issue. 
+
+- Ultimately it comes down to what you know. You can do an absolutely amazing amount in most tools (even excel) so do what you like best. 
+
+- For most people in R the choice is Ggplot vs Base. I mostly use Ggplot because it's what I am the most familiar with (and it has nice defaults (more on this later)).
+
+---
+
+## <a name="common-mistakes"></a>Common Mistakes
+
+A lot of data visualization is common sense, but some of it isn't. These are a few of the examples of mistakes made very frequently by visualization practitioners. 
+
+### <a name="pie-charts"></a> The Pie Chart
+
+Okay, let's get the elephant out of the room first. The pie chart elicitaes a similar response in a dataviz person as a computer scientist's prediction algorithm to a statistician. Initially claims of blashpheme but sometimes upon closer inspection grudging respect. 
+
+```{r}
+data = data.frame(
+  val  = c( 8,   6,   9,   4,   2,  3.5),
+  labs = c("a", "b", "c", "d", "e", "f")
+)
+
+pie(data$val, data$labs)
+```
+
+So why all the ire?
+
+Humans have a very hard time interpreting angles, and that's how a pie chart encodes the data. Looking at the chart above we know that d and f are 0.5 apart, or f is only 87.5% of the size of d, but upon initial inspection the average user would probably say they are the same. 
+
+So let's fix it. 
+```{r}
+library(ggplot2)
+ggplot(data, aes(y = val, x = labs)) + geom_bar(stat = "identity")
+```
+
+Now we can clearly see that f is smaller than d
+
+Is it all warrented?
+
+Penn postdoc Randal Olsen has a good [blog post on pie charts.](http://www.randalolson.com/2016/03/24/the-correct-way-to-use-pie-charts/). It is a highly recomended read but 
