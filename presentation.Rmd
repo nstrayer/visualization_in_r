@@ -2,11 +2,14 @@
 title: "Visualization Practices/Mistakes"
 author: "Nick Strayer"
 date: "May 17, 2016"
-output: html_document
+output: 
+ html_document:
+    css: style.css
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.align = "center")
 ```
 
 ---
@@ -16,11 +19,12 @@ knitr::opts_chunk$set(echo = TRUE)
 - [What to use?](#what-to-use)
 - [Common Mistakes/fixes](#common-mistakes)
     - [Pie Charts](#pie-charts)
-    - Word Clounds
-    - Trucated Axes
-    - Multiple Axes
-    - Information Overload
-    - The Third Dimension
+    - [Bar Charts](#bar-charts)
+    - [Word Clouds](#word-clouds)
+    - [Truncated Axes](#truncated-axes)
+    - [Multiple Axes](#multiple-axes)
+    - [Information Overload](#information-overload)
+    - [The Third Dimension](#third-dimension)
 - Ggplot
     - Weaknesses
     - Strengths
@@ -34,7 +38,6 @@ knitr::opts_chunk$set(echo = TRUE)
     - Don't go crazy
     - Plan Ahead. 
 - Beauty Vs. Clarity. 
-  
   ---
 
 ## <a name="what-to-use"></a> What to use?
@@ -47,6 +50,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - For most people in R the choice is Ggplot vs Base. I mostly use Ggplot because it's what I am the most familiar with (and it has nice defaults (more on this later)).
 
+- Whatever you choose will in the not to distant future be old and replaced by the new best thing, so understanding the concepts is a much better investment of time. 
+
 ---
 
 ## <a name="common-mistakes"></a>Common Mistakes
@@ -55,11 +60,11 @@ A lot of data visualization is common sense, but some of it isn't. These are a f
 
 ### <a name="pie-charts"></a> The Pie Chart
 
-Okay, let's get the elephant out of the room first. The pie chart elicitaes a similar response in a dataviz person as a computer scientist's prediction algorithm to a statistician. Initially claims of blashpheme but sometimes upon closer inspection grudging respect. 
+Okay, let's get the elephant out of the room first. The pie chart elicits a similar response in a data-viz person as a computer scientist's prediction algorithm to a statistician. Initially claims of blaspheme but sometimes upon closer inspection grudging respect. 
 
 ```{r}
 data = data.frame(
-  val  = c( 8,   6,   9,   4,   2,  3.5),
+  val  = c( 8 ,  6 ,  9 ,  4 ,  2 , 3.5),
   labs = c("a", "b", "c", "d", "e", "f")
 )
 
@@ -76,8 +81,358 @@ library(ggplot2)
 ggplot(data, aes(y = val, x = labs)) + geom_bar(stat = "identity")
 ```
 
-Now we can clearly see that f is smaller than d
+Using a bar chart we can clearly see that f is smaller than d.
 
-Is it all warrented?
+Is all the hate warranted?
 
-Penn postdoc Randal Olsen has a good [blog post on pie charts.](http://www.randalolson.com/2016/03/24/the-correct-way-to-use-pie-charts/). It is a highly recomended read but 
+Penn postdoc Randal Olsen has a good [blog post on pie charts.](http://www.randalolson.com/2016/03/24/the-correct-way-to-use-pie-charts/). It is a highly recommended read but to directly quote his rules on pie charts: 
+
+1. The parts must sum to a meaningful whole. Always ask yourself what the parts add up to, and if that makes sense for what you’re trying to convey.
+2. Collapse your categories down to three or fewer. Pie charts cannot communicate multiple proportions, so stick to their strengths and keep your pie charts simple.
+3. Always start your pie charts at the top. We naturally start reading pie charts at the top (the 0° mark). Don’t violate your reader’s expectations.
+
+People intuitively get pie charts so don't rule out their use entirely, but make sure you are using them properly. 
+
+---
+
+
+
+##<a name="bar-charts"></a> When To Use a Bar Chart
+
+Barcharts are fantastic tools. It seems that more often than not they are the best visualization for the job, often outcompeting more complicated flashy visualizations in terms of ease of reading/comprehension. There are some instances where they are not appropriate however. 
+
+As a general rule of thumb if the measure is a quantity of something then it makes sense to use a bar chart. This would include number of infections, a person's weight etc.. 
+
+In this example we will look at a group of students and their percentiles for seminar attendence. 
+
+First we plot with a bar plot. 
+
+```{r}
+data = data.frame(student = c("Tina", "Trish", "Kevin", "Rebecca", "Nick"), 
+                  percentile = c(25, 95, 54, 70, 99)  ) #attendence in percent
+
+plot = ggplot(data, aes(x = student, y = percentile))
+
+plot + geom_bar(stat = "identity")
+```
+
+So the heirarchy of the data is clearly visable but the intuitive interpretation of the bar is slightly confusing. A percentile is not a sum of values but simply a place on the continuium of a scale. Now we visualize it as a dot-plot. 
+
+```{r}
+plot + geom_pointrange(aes(ymin = 0, ymax = 100)) + coord_flip() # Hacking the geom_pointrange a bit so that the lines are the whole width. 
+```
+
+This is more legable and intuitive. We see that the measure is simply a point where the student falls, not the accumulation of percentiles. 
+
+There are some exceptions to this rule. For instance: weightbeing looked at for a single person over time might be best shown on a line chart. Like almost everything in visualization thinking carefully about what your data are before plotting them is important. 
+
+
+
+---
+
+
+
+## <a name="word-clouds"></a> Word Clouds
+
+First we draw a traditional word cloud of the Bertrand Russell's "An essay on the foundations of geometry"
+
+```{r
+library(tm)
+library(SnowballC)
+library(wordcloud)
+
+setwd("data/")
+Russell_Geom <- readChar("Russell_Geometry.txt", file.info("Russell_Geometry.txt")$size)
+text_corpus <- Corpus(VectorSource(Russell_Geom)) #Generate a corpus
+text_corpus <- tm_map(text_corpus, content_transformer(tolower))
+text_corpus <- tm_map(text_corpus, removePunctuation) #remove punctuation
+text_corpus <- tm_map(text_corpus, removeWords, stopwords('english')) #remove commonly used words that dont add meaning. (e.g. I, Me)
+text_corpus <- tm_map(text_corpus, stemDocument) #Turn words into their stems (e.g. Running -> Run)
+
+wordcloud(text_corpus, max.words = 40, random.order = FALSE)
+```
+
+Ahh clearly we can grab very important information on the frequency of the words in this book...
+
+Is "point" or "space" bigger? "Geometry" and "axiom"? Basically it's impossible. 
+
+Now let's do it in a bar chart. 
+```{r
+dtm       <- DocumentTermMatrix(text_corpus)
+dtm2      <- as.matrix(dtm)
+frequency <- colSums(dtm2)
+frequency <- sort(frequency, decreasing=TRUE)
+
+#transform into a tidy dataframe like ggplot desires. 
+freq_df <- as.data.frame(frequency)
+freq_df$word <-  rownames(freq_df)
+
+ggplot(freq_df[1:40,], aes(x = reorder(word, -frequency), y = frequency)) + #sort the data so ggplot respects the dataframe order
+  geom_bar(stat = "identity") +  labs(x = "Word") + #use a barchart and label the xaxis
+  theme(axis.text.x = element_text(angle = 40, hjust = 1)) # rotate the text so we can actually read the words
+```
+
+So while the bar chart might not be as flashy and cool it certainly more accurately coveys the information that you are trying to show. 
+
+That being said, if you are trying to simply make eye candy then go for the word cloud. However, if you are attempting to facilitate meaningful analysis stick to a bar-chart. 
+
+
+---
+
+
+## <a name="truncated-axes"></a>Trucated Axes
+
+The re-arranging of axis is one of the most potentially damaging forms of data visualization mistakes. By truncating an axis you can entirely change the interpretation of a chart. You can exaggerate a difference or minimize it. A good example of this done recently with potentially dangerous side effects is a tweet sent out by the magazine National Review. 
+
+<div class = "imageHolder">
+<img src = "data/climateViz.png" width="500">
+</div>
+
+Look at that, we've all been getting way too worried about climate change! But wait, looks like they started their x-axis at 0. Seems like a good idea until you realize that 0 fahrenheit means absolutely nothing. If you're going to start a temperature at 0 you might as well go all the way and do Kelvin. 
+
+Let's see an example of where trucating the axis _is_ bad. 
+
+```{r}
+data = data.frame("date"  = c(2010, 2011, 2012, 2013),
+                  "deaths"= c(400,  425,   430,  440))
+
+plot <- ggplot(data, aes(x = date, y = deaths)) + geom_line() + theme_bw() + labs(title = "Hospital Deaths from 2010-2013")
+plot
+
+```
+
+Oh my, looks like we've had a massive spike in hopsital deaths. 
+
+Deaths however, are a measurement that has a meaningful start point (zero). So let's try and fix out axis scale to represent that. 
+
+```{r}
+plot + ylim(0,450)
+```
+
+Turns out that was a false alarm (although still 40 more deaths might not be trivial).
+
+__Important point:__ Ggplot automatically truncated the axis in this case. In a bar chart it wont let you set a non-zero axis without some esoteric scale commands but for many other plots (such as points and lines) it automatically truncates the axis so your data just fits in the limits. Be vigilant of this. 
+
+
+---
+
+
+## <a name="multiple-axes"></a>Multiple Axes 
+
+<div class = "imageHolder">
+<img src = "data/twoAxes.png" width="700">
+</div>
+
+[_source_](http://www.tylervigen.com/spurious-correlations)
+
+Continuing with our morbid theme by looking at Nicholas Cage movies Tyler Vigen's [excelent site]((http://www.tylervigen.com/spurious-correlations)) on spurious-correlations illustrates our next point very well. When you make a chart with two different axis you can basically make the data say anything you want. 
+
+Duke Professor Kieran Healy sums this up very well in a blog post titled ["Two Y-Axes"](https://kieranhealy.org/blog/archives/2016/01/16/two-y-axes/). 
+
+<div class = "imageHolder">
+<img src = "data/two_axis.jpg" width="700">
+</div>
+[_source_](https://kieranhealy.org/blog/archives/2016/01/16/two-y-axes/)
+
+This also goes with the previous point of axes truncation. You can see that by changing axes you can very drastically change interpretations. 
+
+Ggplot doesn't even allow multiple axes at all as Hadley Wickham is strongly against the practice. 
+
+<div class = "imageHolder">
+<img src = "data/hadley_tweet.png" width="500">
+</div>
+
+
+---
+
+
+## <a name="information-overload"></a> Information Overload
+
+Say you have a lot of timeseries data. For instance you might want to compare temporal trends in some measurement for members of a clinical trial. One natural tendency might be to plot all of their values on the same plot, like below. 
+
+```{r}
+library(reshape2)
+line_data <- data.frame(x_val = 1:50)
+
+for (letter in letters){
+  slope = rnorm(1)
+  line_data[,letter] <- sin(line_data$x_val + rnorm(1))*slope + rnorm(50)
+}
+
+#melt the big dataframe to a tidy one.
+tidy_lines = melt(line_data, id = c("x_val"))
+
+#plot with different lines for different letters. 
+ggplot(tidy_lines, aes(x = x_val, y = value, color = variable)) + geom_line() + labs(title = "Delicious data spagetti")
+```
+
+Well this is a mess. You really can't tell what's going on in any way. If you want to see any trends or potential outliers you better be able to distinguish between the shade of green for k and i, and then be able to filter out all the noise and run 50 choose 2 comparisons in your head. 
+
+A way to get around this is using a technique known as small multiples. In small multiples you have a bunch of little tiny charts all with a single data element. So in this case it would be 50 seperate line plots with one line each. 
+
+```{r}
+ggplot(tidy_lines, aes(x = x_val, y = value)) + geom_line() + facet_wrap(~variable) + labs(title = "Small multiple lines")
+```
+
+As you can see patterns are much easier to see and outliers pop out immediately. 
+
+There is another method of dealing with this information overload. Say you have explored your data and want to highlight a single (or maybe two) value in the context of the others. You can highlight that individual line (or whatever graphical element you desire) to call attention to it alone in the chart. This is much more of a explanitory data visualization technique but it does work very well for showing context for an individual element. 
+
+```{r}
+# cut our dataframe down to just the line we want to show: 
+z_line <- tidy_lines[tidy_lines$variable == "z", ]
+
+#add the line like the first plot but make them all grey and semi-transparent
+ggplot(tidy_lines) + geom_line(aes(x = x_val, y = value, group = variable),color = "grey", alpha = 0.7) + 
+  labs(title = "Highlighted line") + #Now add a second data element with just highlighted line
+  geom_line(data = z_line, aes(x = x_val, y = value, group = variable), color = "steelblue") 
+```
+
+
+---
+
+
+## <a name="third-dimension"></a> The Third Dimension!
+
+3d charts are cool and very tempting to make, but they are fraught with all sorts of problems. The main one being that perspective (litterally) matters. Just like real life, stuff looks bigger the closer it is, so unless your viewer is going to be viewing your visualization on an oculus rift with stereo 3d you should stick to two dimensions. That being said, per usual, there are some ways around this that are acceptable. 
+
+With that I give you potentially the worst data visualization ever created: 
+
+<div class = "imageHolder">
+<img src = "data/3d_pies_in_the_sky.png" width="500">
+</div>
+
+[_source_](http://viz.wtf/)
+
+As we already talked about pie charts are dangerous as slices with different values can look very similar. Once you take that and add in the perspective skewings of the third dimension you get a perfect storm of misleading. I have no suggestions on how to fix this as there are nothing. Just dont do it. (But later on I will demonstrate an example of when you can use a 3d visualization and be mostly okay.)
+
+---
+
+# Ggplot
+
+While the R and Python battle is a heated battle in the statistics community a much more vitriolic battle is waged over ggplot vs base graphics. Jeff Leek's afformentioned article, while written in a tone calling for understanding on the two sides simply ignited passions to hereto unseen levels.  
+
+<div class = "imageHolder">
+<img src = "data/jeffLeekGoogle.png" width="500">
+</div>
+
+Ultimately (I get to make this final decision) ggplot has it's positives and negatives. 
+
+## Strengths
+
+- __Has fantastic defaults__
+
+It is pretty dang hard to make a plot with ggplot that looks bad. Base graphics? Pretty easy. This is good as it has helped many people put out better graphics than they otherwise would have. 
+
+- __Grammar of Graphics__
+
+the "gg" in ggplot stands for grammar of graphics which is a framework for plotting developed by Leland Wilkinson in his [The Grammar of Graphics.](http://www.amazon.com/Grammar-Graphics-Statistics-Computing/dp/0387245448) The basic tennants behind this methodology are that you start with your data, and then you assign a geometry to elements of that data, such as circle size to population, then you draw those geometries based upon some scaling of your data. When you think about visualization this way it helps you develop a better understanding of the data itself and think of proper ways to visualize it. (Think the bar vs dot chart.) 
+
+- __Verbose__
+
+Due to the grammar of graphics aspect ggplot is rather intellegable. For instance, while writing a line chart takes more characters of code than it does in base graphics it tends to be much clearer what is going on. 
+
+```{r, eval=FALSE}
+#base graphics
+plot(x = df$date, y = df$weight, type = "l", col = "blue")
+
+##ggplot
+ggplot(data = df, aes(x = date, y = weight)) + geom_line(color = "blue")
+```
+
+Is `col` columns? `type` also seems rather esoteric and would require looking up definitions. In ggplot you can see what x is mapping to, what y is mapping to in your data, `geom_line` is rather clear that it's drawing a line and coloring it blue. 
+
+This is important for sharing code with potentially less fluent coders.  
+
+## Weaknesses
+
+- __Slow__ 
+
+It generally takes a good bit of time to construct a ggplot graphic. Base allows you to rapidly get a plot up and running. For instance if you want to check if data is generating quickly or if something interesting is happening a quick `plot(x,y)` is usually more than enough. It doesn't need to look pretty for you. 
+
+- __Limitated functionality__
+
+Want to plot a bunch of different charts on a single plot? With ggplot the charts generated with `facet` have to be of the same geometry. If you want to put together a line and bar plot you need to use another library called `grid` which is a pain, especially considering that it's a single simple command it base (`par(mfrow = c(a,b))`). 
+
+## Summary
+
+Like said at the begining of this document. Choose your plotting library and then apply the above principles in it. Very rarely will you need to jump to a whole different library to do something. 
+
+---
+
+# Other Plotting Libraries
+
+# Plotly 
+
+```{r, echo=FALSE}
+x <- rnorm(20)
+#Function for likelihood
+normalLikelihood <- function(x, mu, sigma_2){
+  n <- length(x)
+  ( (2 * pi * sigma_2)^(-n/2) ) * exp( (-1/(2*sigma_2)) * sum( (x - mu)^2 ))
+}
+
+#values to loop over. 
+mus = seq(mean(x) - 1.5,mean(x) + 1.5, length.out = 500)
+sigma_2s = seq(0.001, var(x) + 1.5, length.out = 500)
+
+#how to find where you are on the matrix for grabbing of values. 
+mu_pos      <- function(i, length){ ( (i-1) %% length ) + 1 }
+sigma_2_pos <- function(i, length){ floor((i-1)/length) + 1}
+
+#need how many mus we are looking at. 
+muLength = length(mus)
+
+likelihoodMat = function(i){
+  mu      = mus[mu_pos(i, muLength)]
+  sigma_2 = sigma_2s[sigma_2_pos(i, muLength)]
+  normalLikelihood(x, mu, sigma_2)
+}
+
+#generate the position itterator. 
+pos = 1: (length(mus)*length(sigma_2s))
+
+results <- sapply(pos, likelihoodMat)
+
+#normalize
+newRes = results/max(results)
+
+#make it into a matrix
+resMat = matrix(newRes, nrow = muLength)
+colnames(resMat) = sigma_2s
+rownames(resMat) = mus
+```
+
+A plotting library that allows you to generate interactive plots directly from R. It does this by rendering them in javascript (using a technique we will see shortly). 
+
+One beautiful thing about plotly is the ability to export ggplot objects directly to it. 
+
+```{r}
+library(plotly)
+d <- diamonds[sample(nrow(diamonds), 1000), ]
+p <- ggplot(data = d, aes(x = carat, y = price)) +
+  geom_point(aes(text = paste("Clarity:", clarity)), size = 2) +
+  geom_smooth(aes(colour = cut, fill = cut)) + facet_wrap(~ cut)
+
+(gg <- ggplotly(p))
+```
+
+Now our normal ggplots can have interactivity which can be absolutely fantastic for exploring outliers/ presenting data in an engaging way. 
+
+Plotly is not limited simply to re-rendering ggplot. It is capible of rendering three dimensional and/or high performance visualizations using the same engine that videogames use. 
+
+In the next example `z` is a matrix of data corresponding to a two parameter normal likelihood. We pass it to plotly and tell it to draw a surface plot and ...
+
+```{r, eval=FALSE}
+plot_ly(z = resMat, type = "surface")
+```
+<div class = "imageHolder">
+```{r, echo=FALSE}
+plot_ly(z = resMat, type = "surface")
+```
+</div">
+...pretty cool. 
+
+Sometimes a 3d visualization is absolutely neccesary (by the data or choice), in these instances you pretty much need the visualization to be interactive to allow the user to be able to explore the 3d space in order to eliminate the biases injected by perspective.
+
+
