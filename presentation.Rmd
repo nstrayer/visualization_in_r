@@ -1,5 +1,5 @@
 ---
-title: "Visualization Practices/Mistakes"
+title: "Visualization in R: Mistakes, Fixes and Tools"
 author: "Nick Strayer"
 date: "May 17, 2016"
 output:
