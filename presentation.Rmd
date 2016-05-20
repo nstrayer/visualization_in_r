@@ -97,11 +97,13 @@ library(treemap)
 treemap(data, c("labs"), "val")
 ```
 
-Even simpler you can simply do a stacked bar chart. 
+I would argue this is actually worse than the pie chart, but if it is certianly a good option for some types of data. Even simpler you can simply do a stacked bar chart. 
 
 ```{r}
 ggplot(data, aes(1, val, fill=labs, width=0.2)) + geom_bar(stat="identity")
 ```
+
+Out of all of these options a bar chart is very arguably the most clear. 
 
 Is all the hate warranted for pie charts?
 
@@ -123,24 +125,26 @@ Bar charts are fantastic tools. It seems that more often than not they are the b
 
 As a general rule of thumb if the measure is a quantity of something then it makes sense to use a bar chart. This would include number of infections, a person's weight etc..
 
-In this example we will look at a group of students and their percentiles for seminar attendance.
+In this example we will look at a group of patients and their percentiles for vitamin d levels in their blood. 
 
 First we plot with a bar plot.
 
 ```{r}
-data = data.frame(student = c("Tina", "Trish", "Kevin", "Rebecca", "Nick"),
-                  percentile = c(25, 95, 54, 70, 99)  ) #attendence in percent
+data = data.frame(student = c("Tina", "Trish", "Kevin", "Rebecca", "Sarah"),
+                  percentile = c(25, 95, 54, 70, 99)  ) #percentile of d levels
 
 plot = ggplot(data, aes(x = student, y = percentile))
 
 plot + geom_bar(stat = "identity")
 ```
 
-So the hierarchy of the data is clearly visible but the intuitive interpretation of the bar is slightly confusing. A percentile is not a sum of values but simply a place on the continuum of a scale. Now we visualize it as a dot-plot.
+So the hierarchy of the data is clearly visible but the intuitive interpretation of the bar is slightly confusing. A percentile is not a sum of values but simply a place on the continuum of a scale. In addition we have a tendency to assign good or bad to large or small levels of bar charts when in this case the middle would be best.
+
+Now we visualize it as a dot-plot.
 
 ```{r}
-plot + geom_pointrange(aes(ymin = 0, ymax = 100)) + coord_flip()
 # Hacking the geom_pointrange a bit so that the lines are the whole width.
+plot + geom_pointrange(aes(ymin = 0, ymax = 100)) + coord_flip()
 ```
 
 This is more legible and intuitive. We see that the measure is simply a point where the student falls, not the accumulation of percentiles.
@@ -187,7 +191,7 @@ data = rbind(data.frame(val = vals1, dataset = "one"),
 
 ```{r}
 p <- ggplot(data, aes(dataset, val))
-p + geom_boxplot(fill = "steelblue", color = "steelblue") + labs(title = "Box Plots")
+p + geom_boxplot(fill = "steelblue", color = "grey") + labs(title = "Box Plots")
 ```
 
 Given the information that we are provided with a standard box plot we would say that these groups are identical. They have the same quantiles that the box plot looks at. 
@@ -382,6 +386,21 @@ ggplot(tidy_lines) + geom_line(aes(x = x_val, y = value, group = variable),color
 ```
 
 
+Sometimes however (Are you sensing a theme?) information overload can be used to your advantage. 
+
+Take for instance the New York Times delegate prediction model: 
+
+<div style = "text-align: center;">
+<img src = "data/nyt_delegates.png" width="800">
+</div>
+
+[_source_](http://www.nytimes.com/interactive/2016/02/27/upshot/republican-delegate-calculator-how-trump-can-win.html)
+
+In this situation we have a ton of lines, way more than a user can truly parse at one time. In this case this is an intentional method of illustrating uncertainty.  This is a topic that could encompase an entire course. If you are interested in the cutting edge research on uncertianty visualization I suggest you look at Jessica Hulman of the University of Washington's [recent work on the topic.](https://medium.com/hci-design-at-uw/hypothetical-outcomes-plots-experiencing-the-uncertain-b9ea60d7c740#.40rytrmiy) 
+
+_As a side note I feel this is a specific area in which statisticians should be doing the inovating. We understand uncertainty better than most and as is evidenced in Jessica Hulman's post they are representing multiple things the same that perhaps shouldn't be (confidence and credible intervals). If anyone has ideas on this, talk to me!_
+
+
 ---
 
 
@@ -454,6 +473,8 @@ Like said at the beginning of this document, choose your plotting library and th
 ---
 
 # <a name="other_libraries"></a>Other Plotting Libraries
+
+Believe it or not there ways to plot data in R other than ggplot and base graphics. The following are a tiny selection of the options. These might not be as fleshed out as ggplot or base but they contain features such as interactivity and larger amounts of automation. 
 
 ## <a name="plotly"></a>Plotly
 
