@@ -4,7 +4,7 @@ author: "Nick Strayer"
 date: "May 17, 2016"
 output:
  html_document:
-   theme: paper
+   theme: cosmo
 ---
 
 ```{r setup, include=FALSE}
@@ -233,15 +233,13 @@ library(tm)
 library(SnowballC)
 library(wordcloud)
 
-setwd("data/")
+setwd("/Users/Nick/Dropbox/vandy/visualization_in_r/data/")
 Russell_Geom <- readChar("Russell_Geometry.txt", file.info("Russell_Geometry.txt")$size)
 text_corpus <- Corpus(VectorSource(Russell_Geom)) #Generate a corpus
 text_corpus <- tm_map(text_corpus, content_transformer(tolower))
 text_corpus <- tm_map(text_corpus, removePunctuation) #remove punctuation
 #Remove commonly used words that dont add meaning. (e.g. I, Me)
 text_corpus <- tm_map(text_corpus, removeWords, stopwords('english'))
-#Turn words into their stems (e.g. Running -> Run)
-text_corpus <- tm_map(text_corpus, stemDocument)
 
 wordcloud(text_corpus, max.words = 40, random.order = FALSE)
 ```
@@ -345,7 +343,7 @@ Ggplot doesn't even allow multiple axes at all as Hadley Wickham is strongly aga
 
 Say you have a lot of time series data. You might want to compare temporal trends in some measurement for patients in a clinical trial. One natural tendency might be to plot all of their values on the same plot, like below.
 
-```{r}
+```{r, fig.width=9}
 library(reshape2)
 line_data <- data.frame(x_val = 1:50)
 
@@ -359,14 +357,14 @@ tidy_lines = melt(line_data, id = c("x_val"))
 
 #plot with different lines for different letters.
 #       data                               color code by letter    draw lines                     add a title
-ggplot(tidy_lines, aes(x = x_val, y = value, color = variable)) + geom_line() + labs(title = "Delicious data spagetti")
+ggplot(tidy_lines, aes(x = x_val, y = value, color = variable)) + geom_line() + labs(title = "Delicious Data Spaghetti")
 ```
 
 Well this is a mess. You really can't tell what's going on in any way. If you want to see any trends or potential outliers you better be able to distinguish between the shade of green for k and i, and then be able to filter out all the noise and run 50 choose 2 comparisons in your head.
 
 A way to get around this is using a technique known as small multiples. In small multiples you have a bunch of little tiny charts all with a single data element. So in this case it would be 50 separate line plots with one line each.
 
-```{r}
+```{r, fig.width=9}
 #       data                                   draw lines     seperate charts by the letter           title it
 ggplot(tidy_lines, aes(x = x_val, y = value)) + geom_line() + facet_wrap(~variable) + labs(title = "Small multiple lines")
 ```
@@ -375,7 +373,7 @@ As you can see patterns are much easier to see and outliers pop out immediately.
 
 There is another method of dealing with this information overload. Say you have explored your data and want to highlight a single (or maybe two) value in the context of the others. You can highlight that individual line (or whatever graphical element you desire) to call attention to it alone in the chart. This is much more of a explanatory data visualization technique but it does work very well for showing context for an individual element.
 
-```{r}
+```{r, fig.width=9}
 # cut our dataframe down to just the line we want to show:
 z_line <- tidy_lines[tidy_lines$variable == "z", ]
 
@@ -521,7 +519,7 @@ This is a plotting library that allows you to generate interactive plots directl
 
 One beautiful thing about plotly is the ability to export ggplot objects directly to it.
 
-```{r}
+```{r, fig.width=9}
 library(plotly)
 
 #grab some of R's built in data.
@@ -546,7 +544,7 @@ In the next example `z` is a matrix of data corresponding to a two parameter nor
 plot_ly(z = resMat, type = "surface")
 ```
 
-```{r, echo=FALSE}
+```{r, fig.width=9, echo=FALSE}
 plot_ly(z = resMat, type = "surface")
 ```
 
@@ -566,7 +564,7 @@ Check out the [html widgets showcase](http://www.htmlwidgets.org/showcase_leafle
 <a name="manhattan_plot"></a>
 I have made a simple htmlwidget library for displaying gwas results and have it hosted on github [here.](https://github.com/nstrayer/D3ManhattanPlots)
 
-```{r}
+```{r, fig.width=9}
 # library(devtools)
 # install_github("nstrayer/D3ManhattanPlots")
 library(manhattanPlot) #no idea why I named it different than the repo name
