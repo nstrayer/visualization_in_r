@@ -15,12 +15,13 @@ knitr::opts_chunk$set(message=FALSE)
 
 ---
 
-## Outline
+# Outline
 
 - [What to use?](#what-to-use)
 - [Common Mistakes/fixes](#common-mistakes)
     - [Pie Charts](#pie-charts)
     - [Bar Charts](#bar-charts)
+    - [Box Plots](#box-plots)
     - [Word Clouds](#word-clouds)
     - [Truncated Axes](#truncated-axes)
     - [Multiple Axes](#multiple-axes)
@@ -88,7 +89,21 @@ ggplot(data, aes(y = val, x = labs)) + geom_bar(stat = "identity")
 
 Using a bar chart we can clearly see that f is smaller than d.
 
-Is all the hate warranted?
+We can also use something called a tree map: 
+
+```{r}
+library(treemap)
+
+treemap(data, c("labs"), "val")
+```
+
+Even simpler you can simply do a stacked bar chart. 
+
+```{r}
+ggplot(data, aes(1, val, fill=labs, width=0.2)) + geom_bar(stat="identity")
+```
+
+Is all the hate warranted for pie charts?
 
 Penn postdoc Randal Olsen has a good [blog post on pie charts.](http://www.randalolson.com/2016/03/24/the-correct-way-to-use-pie-charts/). It is a highly recommended read but to directly quote his rules on pie charts:
 
@@ -136,20 +151,80 @@ There are some exceptions to this rule. For instance: weight being looked at for
 
 ---
 
-## <a name="boxplots"></a> Box Plots
+## <a name="box-plots"></a> Box Plots
 
-Box plots are, like the pie chart, one of the first visualization techniques we are taught. However, it is not neccesarily a good one and many better new options have arisen.
+Box plots are, like the pie chart, one of the first visualization techniques we are taught. However, it is not necessarily a good one and many better new options have arisen.
 
-The problem with box plots is they obscure trends more subtle than the quantiles.
+The problem with box plots is they obscure trends more subtle than the quantiles. Take for instance the following two box plots: 
+
+```{r, echo=FALSE}
+#boxplot code
+
+#generate string of values. 
+vals <- runif(100, min = 10, max = 50)
+vals <- sort(vals)
+
+min <- 10 #   1
+q1 <-  15 #   25
+med <- 23 #   50
+q3 <-  34 #   75
+max <- 42 #   100
+
+vals1 = 1:101
+#quantile(vals1, c(0,0.25, 0.5, 0.75, 1))
+
+vals2 = vals1
+vals2[2:25] = 15
+vals2[27:50] = 42
+vals2[52:75] = 63
+vals2[77:100] = 82
+#quantile(vals2, c(0,0.25, 0.5, 0.75, 1))
+
+data = rbind(data.frame(val = vals1, dataset = "one"),
+             data.frame(val = vals2, dataset = "two"))
+```
 
 
+```{r}
+p <- ggplot(data, aes(dataset, val))
+p + geom_boxplot(fill = "steelblue", color = "steelblue") + labs(title = "Box Plots")
+```
+
+Given the information that we are provided with a standard box plot we would say that these groups are identical. They have the same quantiles that the box plot looks at. 
+
+What happens if we try another way of visualizing the distribution of data? 
+
+First we look at the dot plot:
+
+```{r}
+p + geom_dotplot(binaxis = "y", stackdir = "center", 
+                 fill = "steelblue", color = "steelblue") + 
+  labs(title = "Dot Plots")
+```
+
+Now we can see that these data are very differently distributed. 
+
+Another method of visualizing the distribution of the groups is a violin plot. This is essentially a kernel density plot of the previous plot. Useful for when the data are very large and a dot plot is not particularly useful due to the large number of dots drawn. 
+
+```{r}
+p + geom_violin(adjust = .5, fill = "steelblue", color = "steelblue") + 
+  labs(title = "Violin Plots")
+```
+
+If you still want the familiarity of the box plot combined with the enhanced ability to see the underlying distribution you can combine the two plots as well. 
+
+```{r}
+p + 
+  geom_dotplot(binaxis = "y", stackdir = "center", fill = "steelblue", color = "steelblue") +
+  geom_boxplot(alpha = 0, size=1)
+```
 
 
 ## <a name="word-clouds"></a> Word Clouds
 
 First we draw a traditional word cloud of the Bertrand Russell's "An essay on the foundations of geometry"
 
-```{r
+```{r}
 library(tm)
 library(SnowballC)
 library(wordcloud)
@@ -172,7 +247,7 @@ Ahh clearly we can grab very important information on the frequency of the words
 Is "point" or "space" bigger? "Geometry" and "axiom"? Basically it's impossible.
 
 Now let's do it in a bar chart.
-```{r
+```{r}
 dtm       <- DocumentTermMatrix(text_corpus)
 dtm2      <- as.matrix(dtm)
 frequency <- colSums(dtm2)
