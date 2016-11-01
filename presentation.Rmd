@@ -48,7 +48,7 @@ knitr::opts_chunk$set(message=FALSE)
 
 > "The best camera is the one that's with you." –Chase Jarvis.
 
-A very common question for people starting out with R and visualization is "which library should I use?" Like most things there is no right answer. Every situation is different. I break it down to the following four points.
+A very common question for people starting out with R and visualization is "which library should I use?" Like most things there is no right answer. Every situation is different. These are a few points to keep in mind in deciding which tool to use (hint: it really doesn't matter).
 
 - Jeff Leek has a [fantastic article](http://simplystatistics.org/2016/02/11/why-i-dont-use-ggplot2/) on his blog about this issue.
 
@@ -84,7 +84,8 @@ Humans have a very hard time interpreting angles, and that's how a pie chart enc
 So let's fix it.
 ```{r}
 library(ggplot2)
-ggplot(data, aes(y = val, x = labs)) + geom_bar(stat = "identity")
+ggplot(data, aes(y = val, x = labs)) + 
+  geom_bar(stat = "identity")
 ```
 
 Using a bar chart we can clearly see that f is smaller than d.
@@ -100,12 +101,19 @@ treemap(data, c("labs"), "val")
 I would argue this is actually worse than the pie chart, but if it is certianly a good option for some types of data. Even simpler you can simply do a stacked bar chart. 
 
 ```{r}
-ggplot(data, aes(1, val, fill=labs, width=0.2)) + geom_bar(stat="identity")
+ggplot(data, aes(1, val, fill=labs, width=0.2)) + 
+  geom_bar(stat="identity")
 ```
 
 Out of all of these options a bar chart is very arguably the most clear. 
 
-Is all the hate warranted for pie charts?
+There was a paper a few years ago by two super starts in data visualization Jeffrey Heer and Mike Bostock. In it they took a bunch of visual encodings of the same data (much like we are doing here) and showed them to people and asked them questions about what the data said. They then recorded these results and plotted them to show differences between encoding quality. 
+
+![](chart_comparisons.png)
+
+Pie charts are pretty far down there, but then again so are tree maps. This raises the important question: 
+
+> Is all the hate warranted for pie charts?
 
 Penn postdoc Randal Olsen has a good [blog post on pie charts.](http://www.randalolson.com/2016/03/24/the-correct-way-to-use-pie-charts/). It is a highly recommended read but to directly quote his rules on pie charts:
 
@@ -144,7 +152,8 @@ Now we visualize it as a dot-plot.
 
 ```{r}
 # Hacking the geom_pointrange a bit so that the lines are the whole width.
-plot + geom_pointrange(aes(ymin = 0, ymax = 100)) + coord_flip()
+plot + geom_pointrange(aes(ymin = 0, ymax = 100)) + 
+  coord_flip()
 ```
 
 This is more legible and intuitive. We see that the measure is simply a point where the student falls, not the accumulation of percentiles.
@@ -169,9 +178,9 @@ vals <- runif(100, min = 10, max = 50)
 vals <- sort(vals)
 
 min <- 10 #   1
-q1 <-  15 #   25
+q1  <- 15 #   25
 med <- 23 #   50
-q3 <-  34 #   75
+q3  <- 34 #   75
 max <- 42 #   100
 
 vals1 = 1:101
@@ -191,7 +200,8 @@ data = rbind(data.frame(val = vals1, dataset = "one"),
 
 ```{r}
 p <- ggplot(data, aes(dataset, val))
-p + geom_boxplot(fill = "steelblue", color = "grey") + labs(title = "Box Plots")
+p + geom_boxplot(fill = "steelblue", color = "grey") + 
+  labs(title = "Box Plots")
 ```
 
 Given the information that we are provided with a standard box plot we would say that these groups are identical. They have the same quantiles that the box plot looks at. 
@@ -223,6 +233,12 @@ p +
   geom_boxplot(alpha = 0, size=1)
 ```
 
+Lastly we have the grand daddy of distribution visualizations, the histogram. Nothing could be wrong with the simple well meaning histogram, right? Wrong, it is entirely possible to fall into the same issues as the box-plots with histograms. If your bins are aligned awkwardly with your data two histograms of the same data can look entirely different. 
+
+
+Read [this article](https://flowingdata.com/2012/05/15/how-to-visualize-and-compare-distributions/) by statistician turned data-visualiation expert Nathan Yu on plotting distribution data for a much more thorough treatment of this issue. 
+
+_Personal Plug:_ Use a sliding histogram (patent/trademark pending) to get rid of problems with binning but also keep intepretability that you lose with a kernal density plot. See my [interactive demo.](http://bl.ocks.org/nstrayer/ae6f31caccccc591ad6e6eb8d904bb28)
 
 ## <a name="word-clouds"></a> Word Clouds
 
