@@ -110,7 +110,7 @@ Pie charts fit into figures in space-constrained publications well and people in
 
 Bar charts are fantastic tools. It seems that more often than not they are the best visualization for the job, often out-competing more complicated flashy visualizations in terms of ease of reading/comprehension. There are some instances where they are not appropriate however.
 
-As a general rule of thumb, if the measure is a _quantity_ of something then it makes sense to use a bar chart. This would include number of infections, a person's weight etc..
+As a general rule of thumb, if the measure is a _quantity_ of something then it makes sense to use a bar chart. This would include number of infections, a person's weight etc...
 
 In this example we will look at a group of students and their percentiles for seminar attendance.
 
@@ -147,14 +147,14 @@ There are some exceptions to this rule. For instance: weight being looked at for
 
 Box plots are, like the pie chart, one of the first visualization techniques we are taught. However, it is not neccesarily a good one and many better new options have arisen.
 
-The problem with box plots is they obscure trends more subtle than the quantiles.
+The problem with box plots is that they obscure trends more subtle than the quantiles.
 
 
 
 
 ## <a name="word-clouds"></a> Word Clouds
 
-First we draw a traditional word cloud of the Bertrand Russell's "An essay on the foundations of geometry"
+First we draw a traditional word cloud of the Bertrand Russell's "An Essay on the Foundations of Geometry"
 
 ```{r
 library(tm)
@@ -195,9 +195,9 @@ ggplot(freq_df[1:40,], aes(x = reorder(word, -frequency), y = frequency)) +
   theme(axis.text.x = element_text(angle = 40, hjust = 1)) # rotate the text so we can actually read the words
 ```
 
-So while the bar chart might not be as flashy and cool it certainly more accurately coveys the information that you are trying to show.
+So while the bar chart might not be as flashy and cool, it certainly more accurately conveys the information you are trying to show.
 
-That being said, if you are trying to simply make eye candy then go for the word cloud. However, if you are attempting to facilitate meaningful analysis stick to a bar-chart.
+That being said, if you are trying to simply make eye candy then go for the word cloud. However, if you are attempting to facilitate meaningful analysis, stick to a bar-chart.
 
 
 ---
@@ -205,13 +205,13 @@ That being said, if you are trying to simply make eye candy then go for the word
 
 ## <a name="truncated-axes"></a>Trucated Axes
 
-The re-arranging of axis is one of the most potentially damaging forms of data visualization mistakes. By truncating an axis you can entirely change the interpretation of a chart. You can exaggerate a difference or minimize it. A good example of this done recently with potentially dangerous side effects is a tweet sent out by the magazine National Review.
+The re-arranging of an axis is one of the most potentially damaging forms of data visualization mistakes. By truncating an axis you can entirely change the interpretation of a chart. You can exaggerate a difference or minimize it. A good example of this done recently with potentially dangerous side effects is a tweet sent out by the magazine National Review.
 
 <div style = "text-align: center;">
 <img src = "data/climateViz.png" width="500">
 </div>
 
-Look at that, we've all been getting way too worried about climate change! But wait, looks like they started their x-axis at 0. Seems like a good idea until you realize that 0 Fahrenheit means absolutely nothing. If you're going to start a temperature at 0 you might as well go all the way and do Kelvin.
+Look at that, we've all been getting way too worried about climate change! But wait, looks like they started their y-axis at 0. Seems like a good idea until you realize that 0 Fahrenheit means absolutely nothing. If you're going to start a temperature at 0 you might as well go all the way and do Kelvin.
 
 Let's see an example of where truncating the axis _is_ bad.
 
@@ -299,9 +299,9 @@ A way to get around this is using a technique known as small multiples. In small
 ggplot(tidy_lines, aes(x = x_val, y = value)) + geom_line() + facet_wrap(~variable) + labs(title = "Small multiple lines")
 ```
 
-As you can see patterns are much easier to see and outliers pop out immediately.
+As you can see, patterns are much easier to spot and outliers pop out immediately.
 
-There is another method of dealing with this information overload. Say you have explored your data and want to highlight a single (or maybe two) value in the context of the others. You can highlight that individual line (or whatever graphical element you desire) to call attention to it alone in the chart. This is much more of a explanatory data visualization technique but it does work very well for showing context for an individual element.
+There is another method of dealing with this information overload. Say you have explored your data and want to highlight a single (or maybe two) value in the context of the others. You can highlight that individual line (or whatever graphical element you desire) to call attention to it alone in the chart. This is much more of an explanatory data visualization technique but it does work very well for showing context for an individual element.
 
 ```{r}
 # cut our dataframe down to just the line we want to show:
@@ -377,11 +377,11 @@ It generally takes a good bit of time to construct a ggplot graphic. Base allows
 
 - __Limitated functionality__
 
-Want to plot a bunch of different charts on a single plot? With ggplot the charts generated with `facet` have to be of the same geometry. If you want to put together a line and bar plot you need to use another library called `grid` which is a pain, especially considering that it's a single simple command it base (`par(mfrow = c(a,b))`).
+Want to plot a bunch of different charts on a single plot? With ggplot the charts generated with `facet` have to be of the same geometry. If you want to put together a line and bar plot you need to use another library called `grid` which is a pain, especially considering that it's a single simple command in base (`par(mfrow = c(a,b))`).
 
 ## <a name="summary"></a>Summary
 
-Like said at the beginning of this document, choose your plotting library and then apply the above principles in it. Very rarely will you need to jump to a whole different library to do something. If you do, that's why stackoverflow was invented. #
+Like I said at the beginning of this document, choose your plotting library and then apply the above principles within it. Very rarely will you need to jump to a whole different library to do something. If you do, that's why stackoverflow was invented. #
 
 ---
 
@@ -447,9 +447,9 @@ p <- ggplot(data = d, aes(x = carat, y = price)) +
 ggplotly(p)
 ```
 
-Now our normal ggplots can have interactivity which can be absolutely fantastic for exploring outliers/ presenting data in an engaging way.
+Now our normal ggplots can have interactivity which can be absolutely fantastic for exploring outliers/presenting data in an engaging way.
 
-Plotly is not limited simply to re-rendering ggplot. It is capable of rendering three dimensional and/or high performance visualizations using the same engine that video games use.
+Plotly is not limited simply to re-rendering ggplot. It is capable of rendering three-dimensional and/or high performance visualizations using the same engine that video games use.
 
 In the next example `z` is a matrix of data corresponding to a two parameter normal likelihood. We pass it to plotly and tell it to draw a surface plot and ...
 
@@ -491,7 +491,7 @@ manhattanPlot(d)
 
 Htmlwidgets are very valuable if you have a particular chart you need to make all the time that would benefit from interactivity and isn't a standard plot like those supported in plotly. More and more researchers are [publishing interactive online visualizations](http://danlarremore.com/faculty/) to go along with their papers and the combination of rmarkdown and htmlwidgets makes this very straightforward. No server needed, simply plop the html page generated by a markdown file anywhere and you're good to go.
 
-__Note:__ If you have something that falls into this category and aren't comfortable with JavaScript visualization get in contact with me. I never turn down an opportunity to make cool visualizations.
+__Note:__ If you have something that falls into this category and aren't comfortable with JavaScript visualization, get in contact with me. I never turn down an opportunity to make cool visualizations.
 
 
 ---
@@ -502,7 +502,7 @@ More often than not it is better to keep your visualization simple. However, som
 
 ## <a name="ggpairs"></a>Ggpairs
 
-There are some methods of doing this with R. Most notable would be making a shiny app with multiple plotting panes. In addition there are some nice packages such as `GGally` which contain functions like `ggpairs` which is a souped up scatter matrix with a bunch of extra information.
+There are some methods of doing this with R. Most notable would be making a shiny app with multiple plotting panes. In addition there are some nice packages such as `GGally` which contain functions like `ggpairs` which is a souped-up scatter matrix with a bunch of extra information.
 
 ```{r}
 library(GGally)
@@ -515,7 +515,7 @@ suppressMessages(print(pm))
 
 ## <a name="my_stuff"></a>Home Grown Artisan Visualizations
 
-These are some examples of more complex and interactive visualizations I have built for statistics related applications.
+These are some examples of more complex and interactive visualizations I have built for statistics-related applications.
 
 - [Confidence Interval Coverage](http://nickstrayer.me/binomialFun/confidenceIntervals)
 - [Likelihood Functions](http://nickstrayer.me/likelihood)
