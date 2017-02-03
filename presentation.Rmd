@@ -526,15 +526,15 @@ A technique used in software engineering frequently that can be very valuable wh
 
 ## <a name="advice"></a>Words To the Wise
 
-Don't go nuts. Most likely the user will not understand the data you are showing at nearly the level you do so something that may seem intuitive to you very well be entirely unintelligible to them.
+Don't go nuts. Most likely the user will not understand the data you are showing at nearly the level you do, so something that may seem very intuitive to you may be entirely unintelligible to them.
 
 ---
 
 # <a name="beauty_clarity"></a>Beauty Vs. Clarity
 
-A frustratingly qualitative issue in visualization is the role of beauty. Some people such as Edward Tufte are very strict on the matter. Stating that no "chart junk" should clutter your visualization. Basically that only precisely what is necessary to convey the data should be plotted, nothing more. This is very true and most likely the best practice for scientific articles, but many times beauty is a tool for comprehension as well.
+A frustratingly qualitative issue in visualization is the role of beauty. Some people such as Edward Tufte are very strict on the matter, stating that no "chart junk" should clutter your visualization. Basically that only precisely what is necessary to convey the data should be plotted, nothing more. This is very true and most likely the best practice for scientific articles, but many times beauty is a tool for comprehension as well.
 
-If a plot is beautiful the viewer is more likely to stick with it, to investigate it and explore the data within. There is a field of psychology known as [the generation effect](https://en.wikipedia.org/wiki/Generation_effect) which describes how people remember things better that the explore and explain to themselves. If you data is super clearly displayed then the user might simply see it but never remember it.
+If a plot is beautiful the viewer is more likely to stick with it, to investigate it and to explore the data within. There is a field of psychology known as [the generation effect](https://en.wikipedia.org/wiki/Generation_effect) which describes how people remember things better that they explore and explain to themselves. If you data is super clearly displayed then the user might simply see it but never remember it.
 
 Take for example the following two visualizations. One is beautiful but certainly doesn't convey the underlying data in the most straightforward way, where as the second is pretty spartan but the data is more than clear. Which one would you spend more time looking at (assuming you're not a physicist)?
 
