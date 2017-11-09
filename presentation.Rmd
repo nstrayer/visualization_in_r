@@ -5,6 +5,7 @@ date: "May 17, 2016"
 output:
  html_document:
    theme: paper
+   toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -15,35 +16,9 @@ knitr::opts_chunk$set(message=FALSE)
 
 ---
 
-## Outline
-
-- [What to use?](#what-to-use)
-- [Common Mistakes/fixes](#common-mistakes)
-    - [Pie Charts](#pie-charts)
-    - [Bar Charts](#bar-charts)
-    - [Word Clouds](#word-clouds)
-    - [Truncated Axes](#truncated-axes)
-    - [Multiple Axes](#multiple-axes)
-    - [Information Overload](#information-overload)
-    - [The Third Dimension](#third-dimension)
-- [Ggplot](#ggplot)
-    - [Strengths](#strengths)
-    - [Weaknesses](#weaknesses)
-    - [Bottom Line](#summary)
-- [New Tools/Libraries](#other_libraries)
-    - [plotly](#plotly)
-    - [html widgets](#html_widgets)
-      - [Manhattan Plots](#manhattan_plot)
-- [Complex Visualizations/Dashboards](#complex_viz)
-    - [Ggpairs](#ggpairs)
-    - [Plan Ahead](#requirements_analysis)
-    - [Don't go crazy](#advice)
-- [Beauty Vs. Clarity](#beauty_clarity)
-
----
 
 
-# <a name="what-to-use"></a> What to use?
+# What to use?
 
 > "The best camera is the one that's with you." –Chase Jarvis.
 
@@ -59,11 +34,11 @@ A very common question for people starting out with R and visualization is "whic
 
 ---
 
-# <a name="common-mistakes"></a>Common Mistakes
+# Common Mistakes
 
 A lot of data visualization is common sense, but some of it isn't. These are a few examples of mistakes made very frequently by visualization practitioners.
 
-## <a name="pie-charts"></a> The Pie Chart
+## The Pie Chart
 
 Okay, let's get the elephant out of the room first. The pie chart elicits a similar response in a data-viz person as a computer scientist's prediction algorithm to a statistician. Initially claims of blaspheme but sometimes upon closer inspection begrudging respect.
 
@@ -106,7 +81,7 @@ Pie charts fit into figures in space-constrained publications well and people in
 
 
 
-##<a name="bar-charts"></a> When To Use a Bar Chart
+## When To Use a Bar Chart
 
 Bar charts are fantastic tools. It seems that more often than not they are the best visualization for the job, often out-competing more complicated flashy visualizations in terms of ease of reading/comprehension. There are some instances where they are not appropriate however.
 
@@ -143,7 +118,7 @@ There are some exceptions to this rule. For instance: weight being looked at for
 
 ---
 
-## <a name="boxplots"></a> Box Plots
+## Box Plots
 
 Box plots are, like the pie chart, one of the first visualization techniques we are taught. However, it is not neccesarily a good one and many better new options have arisen.
 
@@ -152,7 +127,7 @@ The problem with box plots is that they obscure trends more subtle than the quan
 
 
 
-## <a name="word-clouds"></a> Word Clouds
+## Word Clouds
 
 First we draw a traditional word cloud of the Bertrand Russell's "An Essay on the Foundations of Geometry"
 
@@ -203,7 +178,7 @@ That being said, if you are trying to simply make eye candy then go for the word
 ---
 
 
-## <a name="truncated-axes"></a>Trucated Axes
+## Trucated Axes
 
 The re-arranging of an axis is one of the most potentially damaging forms of data visualization mistakes. By truncating an axis you can entirely change the interpretation of a chart. You can exaggerate a difference or minimize it. A good example of this done recently with potentially dangerous side effects is a tweet sent out by the magazine National Review.
 
@@ -240,7 +215,7 @@ __Important point:__ Ggplot automatically truncated the axis in this case. In a 
 ---
 
 
-## <a name="multiple-axes"></a>Multiple Axes
+## Multiple Axes
 
 <div style = "text-align: center;">
 <img src = "data/twoAxes.png" width="700">
@@ -269,7 +244,7 @@ Ggplot doesn't even allow multiple axes at all as Hadley Wickham is strongly aga
 ---
 
 
-## <a name="information-overload"></a> Information Overload
+## Information Overload
 
 Say you have a lot of time series data. You might want to compare temporal trends in some measurement for patients in a clinical trial. One natural tendency might be to plot all of their values on the same plot, like below.
 
@@ -317,7 +292,7 @@ ggplot(tidy_lines) + geom_line(aes(x = x_val, y = value, group = variable),color
 ---
 
 
-## <a name="third-dimension"></a> The Third Dimension!
+## The Third Dimension!
 
 3d charts are cool and very tempting to make, but they are fraught with all sorts of problems. The main one being that perspective (literally) matters. Just like real life, stuff looks bigger the closer it is, so unless your viewer is going to be viewing your visualization on an oculus rift with stereo 3d you should stick to two dimensions. That being said, per usual, there are some ways around this that are acceptable.
 
@@ -333,7 +308,7 @@ As we already talked about pie charts are dangerous as slices with different val
 
 ---
 
-# <a name="ggplot"></a> Ggplot
+# ggplot
 
 While R vs. Python is a heated battle in the statistics community, a much more vitriolic battle is waged on the R sideline over plotting vs base graphics. Jeff Leek's aforementioned article, while written in a tone calling for understanding on the two sides simply ignited passions to hereto unseen levels.  
 
@@ -343,7 +318,7 @@ While R vs. Python is a heated battle in the statistics community, a much more v
 
 Ultimately (I get to make this final decision) ggplot has its positives and negatives.
 
-## <a name="strengths"></a>Strengths
+## Strengths
 
 - __Has fantastic defaults__
 
@@ -369,7 +344,7 @@ Is `col` columns? `type` also seems rather esoteric and would require looking up
 
 This is important for sharing code with potentially less fluent coders.  
 
-## <a name="weaknesses"></a>Weaknesses
+## Weaknesses
 
 - __Slow__
 
@@ -379,15 +354,15 @@ It generally takes a good bit of time to construct a ggplot graphic. Base allows
 
 Want to plot a bunch of different charts on a single plot? With ggplot the charts generated with `facet` have to be of the same geometry. If you want to put together a line and bar plot you need to use another library called `grid` which is a pain, especially considering that it's a single simple command in base (`par(mfrow = c(a,b))`).
 
-## <a name="summary"></a>Summary
+## Summary
 
 Like I said at the beginning of this document, choose your plotting library and then apply the above principles within it. Very rarely will you need to jump to a whole different library to do something. If you do, that's why stackoverflow was invented. #
 
 ---
 
-# <a name="other_libraries"></a>Other Plotting Libraries
+# Other Plotting Libraries
 
-## <a name="plotly"></a>Plotly
+## Plotly
 
 ```{r, echo=FALSE}
 x <- rnorm(20)
@@ -468,13 +443,15 @@ Sometimes a 3d visualization is absolutely necessary (by the data or choice), in
 
 ---
 
-## <a name="html_widgets"></a>HTML-Widgets
+## HTML-Widgets
 
 An R library that allows you to bind R with JavaScript. Now that much of R is done in rmarkdown notebooks (like this one) and in shiny applications there is a huge potential for interactivity. We have already seen one of these in plotly above but anyone can make them and many have.
 
 Check out the [html widgets showcase](http://www.htmlwidgets.org/showcase_leaflet.html) to see some of the currently made packages. The process for [making one yourself](http://www.htmlwidgets.org/develop_intro.html) is "simple", it's just like making a standard r package except there is also a JavaScript section. JavaScript though is rather... fun.
 
-<a name="manhattan_plot"></a>
+
+### Manhattan Plots
+
 I have made a simple htmlwidget library for displaying gwas results and have it hosted on github [here.](https://github.com/nstrayer/D3ManhattanPlots)
 
 ```{r}
@@ -496,11 +473,11 @@ __Note:__ If you have something that falls into this category and aren't comfort
 
 ---
 
-# <a name="complex_viz"></a>Complex Visualizations
+# Complex Visualizations
 
 More often than not it is better to keep your visualization simple. However, sometimes it is helpful and or necessary to generate complex visualizations or interactive dashboards. If you have a figure limit for a journal or assignment cramming as much information into a single pane can be very valuable.
 
-## <a name="ggpairs"></a>Ggpairs
+## ggpairs
 
 There are some methods of doing this with R. Most notable would be making a shiny app with multiple plotting panes. In addition there are some nice packages such as `GGally` which contain functions like `ggpairs` which is a souped-up scatter matrix with a bunch of extra information.
 
@@ -513,24 +490,24 @@ pm <- ggpairs(tips, columns = c(1, 6, 2, 3))
 suppressMessages(print(pm))
 ```
 
-## <a name="my_stuff"></a>Home Grown Artisan Visualizations
+## Home Grown Artisan Visualizations
 
 These are some examples of more complex and interactive visualizations I have built for statistics-related applications.
 
 - [Confidence Interval Coverage](http://nickstrayer.me/binomialFun/confidenceIntervals)
 - [Likelihood Functions](http://nickstrayer.me/likelihood)
 
-## <a name="requirements_analysis"></a>Requirements Analysis
+## Requirements Analysis
 
 A technique used in software engineering frequently that can be very valuable when designing a complex visualization piece is something know as [requirements analysis.](https://en.wikipedia.org/wiki/Requirements_analysis) Briefly put: the act of sitting down before starting and thoroughly sketching out exactly what you need and want out of the visualization so you don't waste time in the coding process by backtracking.
 
-## <a name="advice"></a>Words To the Wise
+## Words To the Wise
 
 Don't go nuts. Most likely the user will not understand the data you are showing at nearly the level you do, so something that may seem very intuitive to you may be entirely unintelligible to them.
 
 ---
 
-# <a name="beauty_clarity"></a>Beauty Vs. Clarity
+# Beauty Vs. Clarity
 
 A frustratingly qualitative issue in visualization is the role of beauty. Some people such as Edward Tufte are very strict on the matter, stating that no "chart junk" should clutter your visualization. Basically that only precisely what is necessary to convey the data should be plotted, nothing more. This is very true and most likely the best practice for scientific articles, but many times beauty is a tool for comprehension as well.
 
