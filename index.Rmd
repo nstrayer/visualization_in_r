@@ -1,31 +1,35 @@
 ---
-title: 'Best Practives in Dataviz: An R Perspective'
-author: "Nick Strayer"
-date: "11/9/2017"
-output: 
-  html_document:
-   theme: paper
-   toc: true
+title: "Best Practives in Dataviz: An R Perspective"
+description: |
+  A brief intro to thinking deeply about visualization and R code to do so.
+author:
+  - name: Nick Strayer
+    url: http://nickstrayer.me
+    affiliation: Vanderbilt Biostatistics
+date: "`r Sys.Date()`"
+output: radix::radix_article
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.align = "center")
 knitr::opts_chunk$set(message=FALSE)
-# knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
 library(tidyverse)
-
+library(tm)
+library(SnowballC)
+library(wordcloud)
 # If running for the first time these packages need to be installed
-# install.packages(c('tm', 'SnowballC', 'wordcloud', 'GGally'))
+# install.packages(c('tm', 'SnowballC', 'wordcloud', 'GGally', 'treemap'))
+# install.packages('gghighlight')
 # devtools::install_github('nstrayer/shinysense')
-# devtools::install_github('nstrayer/manhattanplotr)
+# devtools::install_github('nstrayer/manhattanplotr')
 ```
 
----
 
 # Goal of Presentation
 
-By the end of this you should have had a whirlwind tour of the very tip of the datavisualization best-practices iceberg. We will go over a broad range of topics generally applicable to data science usecases but not dive too deep into any single one. One thing to keep in mind the whole time is none of this is absolutely set in stone, most often in the real world you have to bend or break some of these rules to do what you want. 
+By the end of this you will have had a whirlwind tour of the very tip of the data visualization best-practices iceberg. We will go over a broad range of topics generally applicable to data science usecases but not dive too deep into any single one. One thing to keep in mind the whole time is none of this is absolutely set in stone, most often in the real world you have to bend or break some of these rules to do what you want. 
 
 
 
@@ -64,9 +68,9 @@ pie(data$val, data$labs)
 
 So why all the ire?
 
-Humans have a very hard time interpreting angles, and that's how a pie chart encodes the data. Looking at the code/chart above we know that d and f are 0.5 apart, or f is only 87.5% of the value of d, but upon initial inspection the average user would probably say they are the same.
+Humans have a very hard time interpreting angles, and that's how a pie chart encodes the data. Looking at the code/chart above we know that __d__ and __f__ are 0.5 apart, or __f__ is only 87.5% of the value of __d__, but upon initial inspection the average user would probably say they are the same.
 
-So let's fix it.
+### So how could we fix it?
 
 We could use something called a tree map: 
 
@@ -84,20 +88,20 @@ Even simpler you could do a stacked bar chart.
 ```{r}
 library(ggplot2)
 ggplot(data, aes(1, val, fill=labs, width=0.2)) + 
-  geom_bar(stat="identity")
+  geom_col()
 ```
 
 Same concept as the treemap in that value is encoded in area rather than angle. This would be good for a low number of comparisons with logical ordering or as a supplementary figure for a larger visualization. 
 
-Out of all of these options a bar chart is probably the most clear. 
+Out of all of these options a plain bar chart is probably the most clear. 
 
 ```{r}
 ggplot(data, aes(y = val, x = labs)) + 
-  geom_bar(stat = "identity") + 
+  geom_col() + 
   labs("x" = "")
 ```
 
-Using a bar chart we can clearly see that f is smaller than d.
+Using a bar chart we can clearly see that __f__ is smaller than __d__.
 
 There was a paper a few years ago by two super stars in data visualization Jeffrey Heer and Mike Bostock. In it they took a bunch of visual encodings of the same data (much like we are doing here) and showed them to people and asked them questions about what the data said. They then recorded these results and plotted them to show differences between encoding quality. 
 
@@ -130,12 +134,12 @@ Let's look at a group of patients and their percentiles for vitamin d levels in 
 First we plot with a bar plot.
 
 ```{r}
-data = data.frame(student = c("Tina", "Trish", "Kevin", "Rebecca", "Sarah"),
+data <- data.frame(student = c("Tina", "Trish", "Kevin", "Rebecca", "Sarah"),
                   percentile = c(25, 95, 54, 70, 99)  ) #percentile of d levels
 
-plot = ggplot(data, aes(x = student, y = percentile))
+p <- ggplot(data, aes(x = student, y = percentile))
 
-plot + geom_bar(stat = "identity")
+p + geom_col()
 ```
 
 The hierarchy of the data is clearly visible but the intuitive interpretation of the bar is slightly confusing. A percentile is not a sum of values but simply a place on the continuum of a scale. In addition, we have a tendency to assign _good_ or _bad_ to large or small levels of bar charts when in this case the middle would be best.
@@ -143,10 +147,9 @@ The hierarchy of the data is clearly visible but the intuitive interpretation of
 Let's re-visualize the data as a dot-plot.
 
 ```{r}
-# Hacking the geom_pointrange a bit so that the lines are the whole width.
-plot + 
-  geom_linerange(aes(ymin = 0, ymax = 100), alpha = 0.4) +
-  geom_point(color = "steelblue", size = 2) +
+p + 
+  geom_point(color = "steelblue", size = 4) +
+  theme_minimal() + # helps make the grid lines look more like guides
   coord_flip()
 ```
 
@@ -158,11 +161,13 @@ There are some exceptions to this rule. For instance: weight being looked at for
 
 ---
 
-## Box Plots
+## Showing a sample
 
-Box plots are, like the pie chart, one of the first visualization techniques we are taught. However, it is not necessarily a good one and many better new options have arisen.
+What if the thing we're interested in is showing multiple observations of a given value? For instance, say we were looking at the expression of a protein of interest across different conditions. Like good scientists we took multiple measurements of each condition so we should represent that. 
 
-The problem with box plots is they obscure trends at a resolution finer than the quantiles. Take for instance the following two box plots: 
+### Dynamite plots
+
+
 
 ```{r, echo=FALSE}
 #boxplot code
@@ -187,15 +192,96 @@ vals2[52:75] = 63
 vals2[77:100] = 82
 #quantile(vals2, c(0,0.25, 0.5, 0.75, 1))
 
-data = rbind(data.frame(val = vals1, dataset = "one"),
-             data.frame(val = vals2, dataset = "two"))
+
+vals3 = vals1
+vals3[27:50] = 40
+
+
+data <- bind_rows(
+  tibble(val = vals1, dataset = 'a'),
+  tibble(val = vals2, dataset = 'b'),
+  tibble(val = vals3, dataset = 'c')
+)
+
 ```
+
+So I will forgive you if you want to use these plots just due to the fact they have the coolest name, however, don't.
+
+To illustrate why let's look at the dynamite plot of our hypothetical expression experiment...
+
+
+```{r, echo = FALSE}
+expressions <- bind_rows(
+  tibble(
+    expression = c(1,2, 18,21),
+    sample = 'a'
+  ),
+  tibble(
+    expression = c(5,10,18,22),
+    sample = 'b'
+  ),
+  tibble(
+    expression = c(20,6,7,6),
+    sample = 'c'
+  ),
+  tibble(
+    expression = c(10,11,12,11),
+    sample = 'd'
+  )
+)
+
+expression_summarized <- expressions %>% 
+  group_by(sample) %>% 
+  summarise(
+    average = mean(expression),
+    sd = sd(expression)
+  )
+```
+
+
+```{r}
+p <- ggplot(expression_summarized,aes(x = sample, y = average)) +
+  geom_errorbar(aes(ymin = average + sd, ymax = average + sd)) +
+  geom_linerange(aes(ymin = average, ymax = average + sd))
+  
+p + geom_col() 
+```
+
+All these look pretty similar! Must be nothing really interesting going on. Maybe the first two conditions have higher peak? Or do the bars represent variablity? Also, does the top of the bar represent the bottom of an interval? Or the middle?  I can never remember (because it changes from plot to plot). 
+
+Let's actually look at the data that went into these plots. Usually with plots like these the number of datapoints going in is tiny so we may as well just show it. 
+
+```{r}
+p +
+  geom_col(alpha = 0.5) +
+  geom_jitter(data = expressions, aes(x = sample, y = expression), width = 0.1)
+```
+
+Oh, oh my, those aren't the same at all. Let's just clean this up a tiny bit. 
+
+```{r}
+ggplot(expression_summarized,aes(x = sample, y = average)) +
+  geom_pointrange(aes(ymin = average - sd, ymax = average + sd), 
+                  shape = 1, color = 'steelblue') +
+  geom_jitter(data = expressions, aes(x = sample, y = expression), 
+              width = 0.1, alpha = 0.5)
+```
+
+If you want more evidence to push back against your PI with than the word of some random biostats grad student the blog post [dynamite plots must die](https://simplystatistics.org/2019/02/21/dynamite-plots-must-die/) by Rafael Irizarry, chair of biostats at Harvard has much more indepth coverage of why dynamite plots are bad. 
+
+
+### Box Plots
+
+Box plots are, like the pie chart, one of the first visualization techniques we are taught. However, it is not necessarily a good one and many better new options have arisen.
+
+The problem with box plots, much like dynamite plots, is they obscure trends at a resolution finer than the quantiles. Take for instance the following two box plots: 
 
 
 ```{r}
 #Hiding the data input on purpose...
 p <- ggplot(data, aes(dataset, val))
-p + geom_boxplot(fill = "steelblue", color = "grey") + 
+p + 
+  geom_boxplot(fill = "steelblue", color = "grey") + 
   labs(title = "Box Plots")
 ```
 
@@ -206,8 +292,9 @@ What happens if we try another way of visualizing the distribution of data?
 First let's try a(nother form of the) dot plot:
 
 ```{r}
-p + geom_dotplot(binaxis = "y", stackdir = "center", 
-                 fill = "steelblue", color = "steelblue") + 
+p + 
+  geom_dotplot(binaxis = "y", stackdir = "center", 
+               fill = "steelblue", color = "steelblue", dotsize = 0.7) + 
   labs(title = "Dot Plots")
 ```
 
@@ -232,6 +319,8 @@ p +
 
 Now we get the standard and familiar inference of quantiles, combined with seeing the finer resolution information about the distribution. 
 
+### Histograms
+
 Lastly we have the grand daddy of distribution visualizations, the histogram.
 
 ```{r}
@@ -252,7 +341,10 @@ ggplot(data, aes(val)) +
   facet_wrap(~dataset)
 ```
 
-Something to think about. 
+
+Here's a brief animation of the histogram bin widths slowly changing while the underlying dataset doesn't change. Be careful! 
+
+![](https://camo.githubusercontent.com/a2de616b972a05156f9e8290a0727e0ec2cd0e3c/68747470733a2f2f6173736574732e6461746163616d702e636f6d2f70726f64756374696f6e2f7265706f7369746f726965732f313836342f64617461736574732f316361623331376536336136623230643930643063313936363235386365373339353039363131362f616e696d6174696f6e2e676966)
 
 Read [this article](https://flowingdata.com/2012/05/15/how-to-visualize-and-compare-distributions/) by statistician turned data-visualiation expert Nathan Yu on plotting distribution data for a much more thorough treatment of this issue. 
 
@@ -283,20 +375,21 @@ Ahh clearly we can grab very important information on the frequency of the words
 Is "point" or "space" bigger? "Geometry" and "axiom"? Basically it's impossible to tell.
 
 Now let's do it in a bar chart.
-```{r}
-dtm       <- DocumentTermMatrix(text_corpus)
-dtm2      <- as.matrix(dtm)
-frequency <- colSums(dtm2)
-frequency <- sort(frequency, decreasing=TRUE)
 
-#transform into a tidy dataframe like ggplot desires.
-freq_df <- as.data.frame(frequency)
-freq_df$word <-  rownames(freq_df)
+
+```{r, fig.height=10}
+freq_df <- DocumentTermMatrix(text_corpus) %>% 
+  as.matrix() %>% 
+  colSums() %>% {tibble(
+    word = names(.),
+    frequency = .
+  )} %>% 
+  arrange(-frequency)
 
 #sort the data so ggplot respects the dataframe order
-ggplot(freq_df[1:40,], aes(x = reorder(word, -frequency), y = frequency)) +
+ggplot(head(freq_df, 40), aes(x = reorder(word, frequency), y = frequency)) +
   geom_bar(stat = "identity") +  labs(x = "Word") + #use a barchart and label the xaxis
-  theme(axis.text.x = element_text(angle = 40, hjust = 1)) # rotate the text so we can actually read the words
+  coord_flip()
 ```
 
 So while the bar chart might not be as flashy and cool it certainly more accurately coveys the information that you are trying to show.
@@ -320,11 +413,15 @@ Look at that, we've all been getting way too worried about climate change! But w
 Let's see an example of where truncating the axis _is_ bad.
 
 ```{r}
-data <- data.frame("date"  = c(2010, 2011, 2012, 2013),
-                  "deaths"= c(400,  402, 408,  412))
+data <- tibble(
+  "date"  = c(2010, 2011, 2012, 2013),
+  "deaths"= c(400,  402, 408,  412) )
 
-plot <- ggplot(data, aes(x = date, y = deaths)) + geom_line() + theme_bw() + labs(title = "Hospital Deaths from 2010-2013")
-plot
+p <- ggplot(data, aes(x = date, y = deaths)) + 
+  geom_line() + 
+  theme_bw() + 
+  labs(title = "Hospital Deaths from 2010-2013")
+p
 ```
 
 Oh my, looks like we've had a massive spike in hospital deaths.
@@ -332,7 +429,7 @@ Oh my, looks like we've had a massive spike in hospital deaths.
 Deaths however, are a measurement that has a meaningful start point (zero). So let's try and fix our axis scale to represent that.
 
 ```{r}
-plot + ylim(0,450)
+p + ylim(0,450)
 ```
 
 Turns out that was a false alarm (although still 12 more deaths might not be trivial).
@@ -377,21 +474,21 @@ Ggplot doesn't even allow multiple axes at all as Hadley Wickham is strongly aga
 Say you have a lot of time series data. You might want to compare temporal trends in some measurement for patients in a clinical trial. One natural tendency might be to plot all of their values on the same plot, like below.
 
 ```{r, fig.width=9}
-library(reshape2)
-line_data <- data.frame(x_val = 1:50)
-
-for (letter in letters){
-  slope = rnorm(1)
-  line_data[,letter] <- sin(line_data$x_val + rnorm(1))*slope + rnorm(50)
-}
-
-#melt the big dataframe to a tidy one.
-tidy_lines = melt(line_data, id = c("x_val"))
+x_vals <- 1:50
+lots_o_lines <- purrr::map_df(
+  letters, 
+  ~tibble(
+    x = x_vals,
+    y = sin(x_vals + rnorm(1))*rnorm(1) + rnorm(50),    
+    id = .
+  ))
 
 #plot with different lines of different letters.
-ggplot(tidy_lines, aes(x = x_val, y = value, color = variable)) + 
-  geom_line() + 
-  labs(title = "Delicious Data Spaghetti", y = "time")
+p <- ggplot(lots_o_lines, aes(x = x, y = y))
+
+p + 
+  geom_line(aes(color = id)) +
+  labs(title = "Delicious Data Spaghetti", x = "time")
 ```
 
 Well this is a mess. You really can't tell what's going on in any way. If you want to see any trends or potential outliers you better be able to distinguish between the shade of green for k and i, and then be able to filter out all the noise and run 50 choose 2 comparisons in your head.
@@ -399,10 +496,10 @@ Well this is a mess. You really can't tell what's going on in any way. If you wa
 A way to get around this is using a technique known as small multiples. In small multiples you have a bunch of little tiny charts all with a single data element. So in this case it would be 50 separate line plots with one line each.
 
 ```{r, fig.width=9}
-ggplot(tidy_lines, aes(x = x_val, y = value)) + 
-  geom_line() + 
-  facet_wrap(~variable) + #Facet on each line and draw a seperate plot for each.
-  labs(title = "Small multiple lines", y = "time")
+p +
+  geom_line() +
+  facet_wrap(~id) + #Facet on each line and draw a seperate plot for each.
+  labs(title = "Small multiple lines", x = "time")
 ```
 
 As you can see patterns are much easier to see and outliers pop out immediately.
@@ -410,13 +507,12 @@ As you can see patterns are much easier to see and outliers pop out immediately.
 There is another method of dealing with this information overload. Say you have explored your data and want to highlight a single (or maybe two) value in the context of the others. You can highlight that individual line (or whatever graphical element you desire) to call attention to it alone in the chart. This is much more of a explanatory data visualization technique but it does work very well for showing context for an individual element.
 
 ```{r, fig.width=9}
-# cut our dataframe down to just the line we want to show:
-z_line <- tidy_lines[tidy_lines$variable == "z", ]
+library(gghighlight)
 
-#add the line like the first plot but make them all grey and semi-transparent
-ggplot(tidy_lines) + geom_line(aes(x = x_val, y = value, group = variable),color = "grey", alpha = 0.7) +
-  labs(title = "Highlighted line") + #Now add a second data element with just highlighted line
-  geom_line(data = z_line, aes(x = x_val, y = value, group = variable), color = "steelblue")
+p +
+  geom_line(aes(color = id)) +
+  # Highlight just a single line
+  gghighlight(id == 'z')
 ```
 
 
@@ -692,3 +788,4 @@ Take for example the following two visualizations. One is beautiful but certainl
   <img src = "data/prettyViz.jpg" height="450">
   <img src = "data/gravityWaves.jpg" height="450">
 </div>
+
