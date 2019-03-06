@@ -12,8 +12,13 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.align = "center")
 knitr::opts_chunk$set(message=FALSE)
-knitr::opts_chunk$set(cache = TRUE)
+# knitr::opts_chunk$set(cache = TRUE)
 library(tidyverse)
+
+# If running for the first time these packages need to be installed
+# install.packages(c('tm', 'SnowballC', 'wordcloud', 'GGally'))
+# devtools::install_github('nstrayer/shinysense')
+# devtools::install_github('nstrayer/manhattanplotr)
 ```
 
 ---
@@ -258,7 +263,7 @@ _Personal Plug:_ Use a sliding histogram (patent/trademark pending) to get rid o
 
 First we draw a traditional word cloud of the Bertrand Russell's "An essay on the foundations of geometry"
 
-```{r}
+```{r, cache = TRUE}
 library(tm)
 library(SnowballC)
 library(wordcloud)
@@ -315,7 +320,7 @@ Look at that, we've all been getting way too worried about climate change! But w
 Let's see an example of where truncating the axis _is_ bad.
 
 ```{r}
-data = data.frame("date"  = c(2010, 2011, 2012, 2013),
+data <- data.frame("date"  = c(2010, 2011, 2012, 2013),
                   "deaths"= c(400,  402, 408,  412))
 
 plot <- ggplot(data, aes(x = date, y = deaths)) + geom_line() + theme_bw() + labs(title = "Hospital Deaths from 2010-2013")
@@ -602,7 +607,7 @@ A simple htmlwidget library for displaying gwas results and have it hosted on gi
 
 ```{r, fig.width=9}
 # library(devtools)
-# install_github("nstrayer/D3ManhattanPlots")
+# devtools::install_github("nstrayer/D3ManhattanPlots")
 library(manhattanPlot) #no idea why I named it different than the repo name
 
 #Load in package data to test.
