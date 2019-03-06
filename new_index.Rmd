@@ -20,9 +20,10 @@ library(tm)
 library(SnowballC)
 library(wordcloud)
 # If running for the first time these packages need to be installed
-# install.packages(c('tm', 'SnowballC', 'wordcloud', 'GGally'))
+# install.packages(c('tm', 'SnowballC', 'wordcloud', 'GGally', 'treemap'))
+# install.packages('gghighlight')
 # devtools::install_github('nstrayer/shinysense')
-# devtools::install_github('nstrayer/manhattanplotr)
+# devtools::install_github('nstrayer/manhattanplotr')
 ```
 
 
