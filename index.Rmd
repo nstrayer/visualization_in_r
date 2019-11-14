@@ -1,14 +1,13 @@
 ---
 title: "Best Practives in Dataviz: An R Perspective"
-description: |
-  A brief intro to thinking deeply about visualization and R code to do so.
-author:
-  - name: Nick Strayer
-    url: http://nickstrayer.me
-    affiliation: Vanderbilt Biostatistics
+author: "Nick Strayer"
 date: "`r Sys.Date()`"
-output: radix::radix_article
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -19,6 +18,7 @@ library(tidyverse)
 library(tm)
 library(SnowballC)
 library(wordcloud)
+
 # If running for the first time these packages need to be installed
 # install.packages(c('tm', 'SnowballC', 'wordcloud', 'GGally', 'treemap'))
 # install.packages('gghighlight')
@@ -48,6 +48,7 @@ A very common question for people starting out with R and visualization is "whic
 - Whatever you choose will, in the not to distant future, be old and replaced by the new best thing, so understanding the concepts is a much better investment of your time. The next bit of this will be trying to reinforce good concepts.
 
 ---
+
 
 # Common Mistakes
 
@@ -550,7 +551,68 @@ As we already talked about pie charts are dangerous as slices with different val
 
 ---
 
-# Ggplot
+
+# Designing Visualizations
+
+So you have some interesting data and you need to build a plot. How should you approach the problem? There is no one-size-fits-all approach but the following are a few tips and techniques to building an effective visualization within a reasonable amount of time. 
+
+## Requirements Analysis
+
+A technique used in software engineering (but really any engineering) that can be very valuable when designing a visualizations is something know as [requirements analysis.](https://en.wikipedia.org/wiki/Requirements_analysis)
+
+Requirements analysis is in essence the act of sitting down before starting and thoroughly sketching out exactly what you need and want out of the visualization so you don't waste time in the coding process by backtracking.
+
+![](https://image.slidesharecdn.com/sepase3-171112025935/95/software-engineering-requirement-analysis-specification-15-638.jpg?cb=1510455637) _I had to use this because it uses comic-sans._
+
+For example, say you are building a report looking at the time to event for some outcome. The person you are building the report is interested in how the time to event changes based on the product the event is happening on. The study was poorly funded so there are only a few dozen observations. 
+
+In this scenario your main goal is to compare values across conditions...
+
+- Since the condition of "product" doesn't change across time there's no real pairing to look at. 
+  - This means you probably want a visualization that shows distribution. 
+- Since you don't have many observation you will probably want to use a technique that directly shows the data such as a dot/beeswarm plot. 
+- Because you have just a few categories and the comparison of interest is the value, you should facet each dot plot so it is aligned by the numeric axis. 
+
+Don't go crazy and explicitly lay out every little thing but make sure you have a clear goal and an idea of what you need to get there. Also, it's okay if things need to be tweaked along the way. 
+
+
+## Don't Go Crazy
+
+By virtue of cleaning and working with the data, you will most likely have a much more intimate understanding of it than the viewers of your visualization. Keep this in mind as you decide how to present your data. Something that may seem intuitive to you very well be entirely unintelligible to those less in touch with the data. 
+
+## Beauty Vs. Clarity
+
+A frustratingly qualitative issue in visualization is the role of beauty. Some people such as Edward Tufte are very strict on the matter. Stating that no "chart junk" should clutter your visualization. Basically that only precisely what is necessary to convey the data should be plotted, nothing more. This is very true and most likely the best practice for scientific articles, but many times beauty is a tool for comprehension as well.
+
+If a plot is beautiful the viewer is more likely to stick with it, to investigate it and explore the data within. There is a field of psychology known as [the generation effect](https://en.wikipedia.org/wiki/Generation_effect) which describes how people remember things better that the explore and explain to themselves. If you data is super clearly displayed then the user might simply see it but never remember it.
+
+Take for example the following two visualizations. One is beautiful but certainly doesn't convey the underlying data in the most straightforward way, where as the second is pretty spartan but the data is more than clear. Which one would you spend more time looking at (assuming you're not a physicist)?
+
+<div style = "text-align: center;">
+  <img src = "data/prettyViz.jpg" height="450">
+  <img src = "data/gravityWaves.jpg" height="450">
+</div>
+
+
+## Home Grown Artisan Visualizations
+
+These are some examples of more complex and interactive visualizations I have built for statistics related applications.
+
+- [Explaining MCMC](http://livefreeordichotomize.com/2017/10/14/mcmc-and-the-case-of-the-spilled-seeds/)
+- [The Power Series](http://livefreeordichotomize.com/2017/08/14/the-exponential-power-series/)
+- [Confidence Interval Coverage](http://nickstrayer.me/binomialFun/confidenceIntervals)
+- [Likelihood Functions](http://nickstrayer.me/likelihood)
+- [Multimorbidity Explorere](https://prod.tbilab.org/phewas_me/)
+
+
+
+
+
+# Tools (revisited)
+
+While it's all good to claim tools don't matter. Ultimately you _do_ need to use a tool to build your visualizations. So here's some of the options. 
+
+## Ggplot
 
 While R vs. Python is a heated battle in the statistics community, a much more vitriolic battle is waged on the R sideline over plotting vs base graphics. Jeff Leek's aforementioned article, while written in a tone calling for understanding on the two sides simply ignited passions to hereto unseen levels.  
 
@@ -560,7 +622,7 @@ While R vs. Python is a heated battle in the statistics community, a much more v
 
 Ultimately, `ggplot` has its positives and negatives.
 
-## Strengths
+### Strengths
 
 - __Has fantastic defaults__
 
@@ -588,25 +650,21 @@ This is important for sharing code with potentially less fluent coders.
 
 In addition, to me, the `ggplot` chart is much more pleasing. The lines in the background facilitate comparisons of values far away from eachother, the axes have good names, and there is no harsh boundry around the plot. 
 
-## Weaknesses
+### Weaknesses
 
 - __Slow__
 
-It generally takes a good bit of time to construct a ggplot graphic. Base allows you to rapidly get a plot up and running. For instance if you want to check if your simulation is running properly or if something interesting is happening in your data a quick `plot(x,y)` is usually more than enough. It doesn't need to look pretty for you.
+It generally takes a good bit of time to construct a ggplot graphic. Base allows you to rapidly get a plot up and running. For instance if you want to check if your simulation is running properly or if something interesting is happening in your data a quick `plot(x,y)` is usually more than enough. It doesn't need to look pretty for you. 
 
 - __Limitated functionality__
 
-Want to plot a bunch of different charts on a single plot? With ggplot the charts generated with `facet` have to be of the same geometry. If you want to put together a line and bar plot you need to use another library called `grid` which is a pain, especially considering that it's a single simple command it base (`par(mfrow = c(a,b))`).
+Want to plot a bunch of different charts on a single plot? With ggplot the charts generated with `facet` have to be of the same geometry. If you want to put together a line and bar plot you need to use another library called `grid` which is a pain, especially considering that it's a single simple command it base (`par(mfrow = c(a,b))`). 
 
-## Summary
 
-Like said at the beginning of this document, choose your plotting library and then apply the above principles in it. Very rarely will you need to jump to a whole different library to do something. If you do, that's why stackoverflow was invented. 
+### Fixes?
 
----
+There are some strong efforts to fix both of these weaknesses. RStudio is currently heading up a project to rewrite the main rendering engine behind ggplot and the early results show very impressive speedups. Also, the [patchwork package](https://patchwork.data-imaginist.com/) lets you easily combine multiple ggplot visualation together in a straightforward way. 
 
-# Other Plotting Libraries
-
-Believe it or not there ways to plot data in R other than `ggplot` and base graphics. The following are a tiny selection of the options. These might not be as fleshed out as ggplot or base but they contain features such as interactivity and larger amounts of automation. 
 
 ## Plotly
 
@@ -687,30 +745,44 @@ plot_ly(z = resMat, type = "surface")
 Sometimes a 3d visualization is absolutely necessary (by the data or choice), in these instances you pretty much need the visualization to be interactive (or at least animated) to allow the user to be able to explore the 3d space in order to eliminate the biases injected by perspective.
 
 
----
 
-## HTML-Widgets
+- 
 
-This is an R library that allows you to bind R with JavaScript. Now that much of R is done in rmarkdown notebooks (like this one) and in shiny applications there is a huge potential for interactivity. We have already seen one of these in plotly above but anyone can make them and many have.
+### Summary
 
-Check out the [html widgets showcase](http://www.htmlwidgets.org/showcase_leaflet.html) to see some of the currently made packages. The process for [making one yourself](http://www.htmlwidgets.org/develop_intro.html) is "simple", it's just like making a standard r package except there is also a JavaScript section. JavaScript though is rather... fun.
+Like said at the beginning of this document, choose your plotting library and then apply the above principles in it. Very rarely will you need to jump to a whole different library to do something. If you do, that's why stackoverflow was invented. 
 
-Just as an example here are two html widgets I have made after needing to do a plot type not possible with current packages. 
 
-__Manhattan Plots__
 
-A simple htmlwidget library for displaying gwas results and have it hosted on github [here.](https://github.com/nstrayer/D3ManhattanPlots)
+## R2D3
 
-```{r, fig.width=9}
-# library(devtools)
-# devtools::install_github("nstrayer/D3ManhattanPlots")
-library(manhattanPlot) #no idea why I named it different than the repo name
+Until recently building custom interactive visualization for R using Javascript required a lot of boilerplate code and building an entire package. The package [R2D3](https://rstudio.github.io/r2d3/) vastly simplifies this process by allowing you to write plain javascript code and have data from R magically imported into it.
 
-#Load in package data to test.
-d = sampleVals
 
-#Draw it!
-manhattanPlot(d)  
+<div style = "text-align: center;">
+<img src = "https://rstudio.github.io/r2d3/tools/README/r2d3-hex.png" width="250">
+</div>
+
+
+D3 is like the ggplot of the javascript visualization world. Most people that are serious about visualizations in javascript use it. It is much lower level than ggplot, but the amount of expression it gives you to build custom visualization's is practically unlimited. 
+
+So while you still have to learn how to write visualizations in javascript/d3, you don't have to do anything other than plop some javascript code in a file or markdown chunk to get your data from R into the extremely powerful ecosystem of javascript data visualization. 
+
+
+### Examples
+
+Here's a few examples I've recently made:
+
+__Interactive Upset__
+
+```{r, fig.width = 5}
+r2d3::r2d3(
+  script = 'upset_plot/upset.js',
+  data = readr::read_rds("upset_plot/data/fake_upset_main.rds"),
+  options = readr::read_rds('upset_plot/data/fake_upset_options.rds'),
+  dependencies = c("d3-jetpack", 'upset_plot/helpers.js'),
+  css= 'upset_plot/upset.css'
+)
 ```
 
 
@@ -718,74 +790,25 @@ __You-Draw-It charts__
 
 These are inspired by a [great article done by the Times](https://www.nytimes.com/interactive/2017/01/15/us/politics/you-draw-obama-legacy.html). (Unfortunately not by me :()
 
+See my package, [shinysense](http://nickstrayer.me/shinysense/) for more details and examples.
+
 ```{r}
 library(shinysense) 
 
-random_data <- data_frame(time = 1:30,metric = time * sin(time / 6) + rnorm(30))
-  
-drawr_widget(
-  data = random_data,
-  draw_start = 15,
-  x_key = "time",
-  y_key = "metric",
-  width="100%"
-)
+tibble(
+  x = 1:50, 
+  value = x * sin(x / 6) + rnorm(50)
+) %>% 
+  drawr(
+    x_col = x,
+    y_col = value,
+    draw_start = 25 # Start obscuring data after x = 25
+  )
+
 ```
 
 
-Htmlwidgets are very valuable if you have a particular chart you need to make all the time that would benefit from interactivity and isn't a standard plot like those supported in plotly. More and more researchers are [publishing interactive online visualizations](http://danlarremore.com/faculty/) to go along with their papers and the combination of rmarkdown and htmlwidgets makes this very straightforward. No server needed, simply plop the html page generated by a markdown file anywhere and you're good to go.
+R2D3 is very valuable if you have a particular chart you need to make all the time that would benefit from interactivity and isn't a standard plot like those supported in plotly. More and more researchers are [publishing interactive online visualizations](http://danlarremore.com/faculty/) to go along with their papers and the combination of rmarkdown and R2D3 makes this very straightforward. No server needed.
 
 __Note:__ If you have something that falls into this category and aren't comfortable with JavaScript visualization get in contact with me. I never turn down an opportunity to make cool visualizations.
-
-
----
-
-# Complex Visualizations
-
-More often than not it is better to keep your visualization simple. However, sometimes it is helpful and or necessary to generate complex visualizations or interactive dashboards. If you have a figure limit for a journal or assignment cramming as much information into a single pane can be very valuable.
-
-## ggpairs
-
-There are some methods of doing this with R. Most notable would be making a shiny app with multiple plotting panes. In addition there are some nice packages such as `GGally` which contain functions like `ggpairs` which is a souped up scatter matrix with a bunch of extra information.
-
-```{r}
-library(GGally)
-data(tips, package = "reshape")
-pm <- ggpairs(tips, columns = c(1, 6, 2, 3))
-
-# we have to supress some dumb binwidth warnings that we cant fix because this is a wrapper function.
-suppressMessages(print(pm))
-```
-
-## Home Grown Artisan Visualizations
-
-These are some examples of more complex and interactive visualizations I have built for statistics related applications.
-
-- [Explaining MCMC](http://livefreeordichotomize.com/2017/10/14/mcmc-and-the-case-of-the-spilled-seeds/)
-- [The Power Series](http://livefreeordichotomize.com/2017/08/14/the-exponential-power-series/)
-- [Confidence Interval Coverage](http://nickstrayer.me/binomialFun/confidenceIntervals)
-- [Likelihood Functions](http://nickstrayer.me/likelihood)
-
-## Requirements Analysis
-
-A technique used in software engineering frequently that can be very valuable when designing a complex visualization piece is something know as [requirements analysis.](https://en.wikipedia.org/wiki/Requirements_analysis) Briefly put: the act of sitting down before starting and thoroughly sketching out exactly what you need and want out of the visualization so you don't waste time in the coding process by backtracking.
-
-## Words To the Wise
-
-Don't go nuts. Most likely the user will not understand the data you are showing at nearly the level you do so something that may seem intuitive to you very well be entirely unintelligible to them.
-
----
-
-# Beauty Vs. Clarity
-
-A frustratingly qualitative issue in visualization is the role of beauty. Some people such as Edward Tufte are very strict on the matter. Stating that no "chart junk" should clutter your visualization. Basically that only precisely what is necessary to convey the data should be plotted, nothing more. This is very true and most likely the best practice for scientific articles, but many times beauty is a tool for comprehension as well.
-
-If a plot is beautiful the viewer is more likely to stick with it, to investigate it and explore the data within. There is a field of psychology known as [the generation effect](https://en.wikipedia.org/wiki/Generation_effect) which describes how people remember things better that the explore and explain to themselves. If you data is super clearly displayed then the user might simply see it but never remember it.
-
-Take for example the following two visualizations. One is beautiful but certainly doesn't convey the underlying data in the most straightforward way, where as the second is pretty spartan but the data is more than clear. Which one would you spend more time looking at (assuming you're not a physicist)?
-
-<div style = "text-align: center;">
-  <img src = "data/prettyViz.jpg" height="450">
-  <img src = "data/gravityWaves.jpg" height="450">
-</div>
 
